@@ -193,11 +193,47 @@ var organizationResource = {
   "name": organizationName
 }
 
+// for supabase fields, matching spec
+
+var patientRow = {
+  "id": "patient-" + mrn,
+  "mrn": mrn,
+  "family_name": familyName,
+  "given_name": givenName,
+  "gender": mapGender(hl7Gender),
+  "birth_date": hl7ToFhirDate(dob),
+  "address_line": v(addressLine),
+  "city": v(city),
+  "postal_code": v(postcode),
+  "phone": v(phone),
+  "organization": organizationName,
+  "resource": JSON.parse(JSON.stringify(patientResource))
+};
+
+var encounterRow = {
+  "encounter_id": visitNumber !== "" ? visitNumber : mrn,
+  "patient_id": "patient-" + mrn,
+  "status": mapEncounterStatus(messageType, dischargeDateTime),
+  "encounter_class": mapEncounterClass(patientClass),
+  "participant": attendingFamily !== "" ? "DR " + attendingGiven + " " + attendingFamily : null,
+  "admit_datetime": admitDateTime !== "" ? hl7ToFhirDateTime(admitDateTime) : null,
+  "discharge_datetime": dischargeDateTime !== "" ? hl7ToFhirDateTime(dischargeDateTime) : null,
+  "ward": v(ward),
+  "room": v(room),
+  "bed": v(bed),
+  "service_provider": organizationName,
+  "hospital_service": v(hospitalService),
+  "resource": JSON.parse(JSON.stringify(encounterResource))
+};
+
+
 //Mirth's built-in mechanism for passing data between the transformer and destinations
 
 channelMap.put('fhirPatient', JSON.stringify(patientResource));
 channelMap.put('fhirEncounter', JSON.stringify(encounterResource));
 channelMap.put('fhirOrganization', JSON.stringify(organizationResource));
+channelMap.put('patientRow', JSON.stringify(patientRow));
+channelMap.put('encounterRow', JSON.stringify(encounterRow));
 
 
 //logs
